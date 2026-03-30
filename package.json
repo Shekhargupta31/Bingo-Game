@@ -1,14 +1,14 @@
 {
   "name": "react-example",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.ts",
-    "clean": "rm -rf dist",
+    "start": "tsx server.ts",
+    "clean": "powershell -NoProfile -Command \"if (Test-Path dist) { Remove-Item -Recurse -Force dist }\"",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

@@ -6,6 +6,11 @@ export interface Player {
 
 export type GameMode = 'single' | 'multi' | null;
 
+export type CompletedPattern =
+  | { type: 'row'; index: number }
+  | { type: 'col'; index: number }
+  | { type: 'diag'; index: 0 | 1 };
+
 export interface GameState {
   board: number[][];
   marked: boolean[][];

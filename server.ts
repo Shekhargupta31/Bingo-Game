@@ -4,6 +4,19 @@ import { Server } from "socket.io";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 
+type Player = {
+  id: string;
+  name: string;
+  score: number;
+};
+
+type RoomData = {
+  players: Player[];
+  currentTurn: number;
+  gameStarted: boolean;
+  selectedNumbers: number[];
+};
+
 async function startServer() {
   const app = express();
   const httpServer = createServer(app);
@@ -13,15 +26,20 @@ async function startServer() {
     },
   });
 
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Socket.io logic
-  const rooms = new Map();
+  const rooms = new Map<string, RoomData>();
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
 
     socket.on("create-room", (roomCode, playerName) => {
+      if (rooms.has(roomCode)) {
+        socket.emit("room-error", "Room code already exists");
+        return;
+      }
+
       socket.join(roomCode);
       const roomData = {
         players: [{ id: socket.id, name: playerName, score: 0 }],
@@ -64,16 +82,26 @@ async function startServer() {
             });
           }
         } else {
-          socket.emit("error", "Room is full");
+          socket.emit("room-error", "Room is full");
         }
       } else {
-        socket.emit("error", "Room not found");
+        socket.emit("room-error", "Room not found");
       }
     });
 
     socket.on("make-move", ({ roomCode, number }) => {
       const room = rooms.get(roomCode);
       if (room && room.gameStarted) {
+        if (room.players[room.currentTurn]?.id !== socket.id) {
+          socket.emit("room-error", "It is not your turn");
+          return;
+        }
+
+        if (room.selectedNumbers.includes(number)) {
+          socket.emit("room-error", "That number was already selected");
+          return;
+        }
+
         // Broadcast the selected number to everyone in the room
         room.selectedNumbers.push(number);
         io.to(roomCode).emit("number-selected", number);
@@ -94,7 +122,7 @@ async function startServer() {
 
     socket.on("play-again", (roomCode) => {
       const room = rooms.get(roomCode);
-      if (room) {
+      if (room && room.players.length === 2) {
         room.selectedNumbers = [];
         room.gameStarted = true;
         room.currentTurn = 0;
@@ -116,6 +144,8 @@ async function startServer() {
           } else {
             io.to(roomCode).emit("player-left");
             room.gameStarted = false;
+            room.currentTurn = 0;
+            room.selectedNumbers = [];
           }
         }
       }

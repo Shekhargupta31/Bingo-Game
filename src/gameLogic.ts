@@ -1,4 +1,4 @@
-import { BINGO_LETTERS } from './types';
+import { BINGO_LETTERS, CompletedPattern } from './types';
 
 export const generateBoard = (): number[][] => {
   const numbers = Array.from({ length: 25 }, (_, i) => i + 1);
@@ -10,12 +10,12 @@ export const generateBoard = (): number[][] => {
   return board;
 };
 
-export const checkLines = (marked: boolean[][]): number => {
-  let lines = 0;
+export const getCompletedPatterns = (marked: boolean[][]): CompletedPattern[] => {
+  const patterns: CompletedPattern[] = [];
 
   // Rows
   for (let i = 0; i < 5; i++) {
-    if (marked[i].every(val => val)) lines++;
+    if (marked[i].every(val => val)) patterns.push({ type: 'row', index: i });
   }
 
   // Columns
@@ -27,7 +27,7 @@ export const checkLines = (marked: boolean[][]): number => {
         break;
       }
     }
-    if (colComplete) lines++;
+    if (colComplete) patterns.push({ type: 'col', index: j });
   }
 
   // Diagonals
@@ -37,10 +37,14 @@ export const checkLines = (marked: boolean[][]): number => {
     if (!marked[i][i]) diag1 = false;
     if (!marked[i][4 - i]) diag2 = false;
   }
-  if (diag1) lines++;
-  if (diag2) lines++;
+  if (diag1) patterns.push({ type: 'diag', index: 0 });
+  if (diag2) patterns.push({ type: 'diag', index: 1 });
 
-  return lines;
+  return patterns;
+};
+
+export const checkLines = (marked: boolean[][]): number => {
+  return getCompletedPatterns(marked).length;
 };
 
 export const getBingoProgress = (lines: number): string[] => {
