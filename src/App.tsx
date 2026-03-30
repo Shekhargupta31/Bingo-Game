@@ -99,6 +99,8 @@ export default function App() {
   const isPlayerTurn =
     gameState.currentTurn === (gameMode === 'single' ? 'player' : socketRef.current?.id);
   const currentPlayer = players.find(player => player.id === socketRef.current?.id);
+  const didPlayerWin = gameState.winner === playerName;
+  const didPlayerLose = Boolean(gameState.isGameOver && !gameState.isDraw && gameState.winner && !didPlayerWin);
 
   useLayoutEffect(() => {
     const boardFrame = boardFrameRef.current;
@@ -313,7 +315,7 @@ export default function App() {
 
     socket.on('game-start', ({ players: updatedPlayers, turn }) => {
       setPlayers(updatedPlayers);
-      setGameState(prev => ({ ...prev, currentTurn: turn, isGameOver: false, winner: null }));
+      setGameState(prev => ({ ...prev, currentTurn: turn, isGameOver: false, isDraw: false, winner: null }));
       const other = updatedPlayers.find(p => p.id !== socket.id);
       if (other) setOpponentName(other.name);
     });
@@ -335,7 +337,7 @@ export default function App() {
     });
 
     socket.on('game-over', ({ winner, isTie }: { winner: string | null; isTie: boolean }) => {
-      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: isTie, winner }));
+      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: isTie, winner, currentTurn: null }));
       if (isTie) {
         return;
       }
@@ -993,13 +995,21 @@ export default function App() {
                 <div>
                   <p className="text-xs uppercase tracking-[0.2em] text-[var(--muted)]">Match Pulse</p>
                   <p className="text-sm font-semibold text-[var(--ink)]">
-                    {players.length === 2
-                      ? (isPlayerTurn ? 'Your move is live now.' : `${opponentName} is deciding their move.`)
-                      : 'Room is ready. Waiting for one more player to join.'}
+                    {gameState.isGameOver
+                      ? (gameState.isDraw
+                          ? 'Both boards finished together. The round ends in a draw.'
+                          : (didPlayerWin ? 'You closed the match. Celebration unlocked.' : `${opponentName} finished first.`))
+                      : players.length === 2
+                        ? (isPlayerTurn ? 'Your move is live now.' : `${opponentName} is deciding their move.`)
+                        : 'Room is ready. Waiting for one more player to join.'}
                   </p>
                 </div>
-                <div className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] ${players.length === 2 ? 'bg-[rgba(99,215,160,0.14)] text-[var(--success)]' : 'bg-[rgba(255,138,102,0.14)] text-[var(--coral)]'}`}>
-                  {players.length === 2 ? 'Match On' : 'Standby'}
+                <div className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] ${
+                  gameState.isGameOver
+                    ? (gameState.isDraw ? 'bg-[rgba(245,199,107,0.14)] text-[var(--gold)]' : (didPlayerWin ? 'bg-[rgba(99,215,160,0.14)] text-[var(--success)]' : 'bg-[rgba(255,138,102,0.14)] text-[var(--coral)]'))
+                    : (players.length === 2 ? 'bg-[rgba(99,215,160,0.14)] text-[var(--success)]' : 'bg-[rgba(255,138,102,0.14)] text-[var(--coral)]')
+                }`}>
+                  {gameState.isGameOver ? (gameState.isDraw ? 'Draw' : (didPlayerWin ? 'You Won' : 'You Lost')) : (players.length === 2 ? 'Match On' : 'Standby')}
                 </div>
               </motion.div>
 
@@ -1020,7 +1030,11 @@ export default function App() {
                       <p className="text-lg font-bold text-[var(--ink)]">{currentPlayer?.name || playerName}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-[var(--muted)]">{isPlayerTurn && players.length === 2 ? 'Tap any open number to keep the pressure on.' : 'Your board is synced and ready.'}</p>
+                  <p className="text-sm text-[var(--muted)]">
+                    {gameState.isGameOver
+                      ? (gameState.isDraw ? 'Match Draw' : (didPlayerWin ? 'You Won' : 'You Lost'))
+                      : (isPlayerTurn && players.length === 2 ? 'Tap any open number to keep the pressure on.' : 'Your board is synced and ready.')}
+                  </p>
                 </motion.div>
 
                 <motion.div
@@ -1039,9 +1053,15 @@ export default function App() {
                       <p className="text-lg font-bold text-[var(--ink)]">{players.length === 2 ? opponentName : 'Waiting for player'}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-[var(--muted)]">
-                    {players.length === 2 ? (isPlayerTurn ? 'They are watching your move.' : 'Their turn is active now.') : 'Invite a friend with the room code above.'}
-                  </p>
+                  {gameState.isGameOver && !gameState.isDraw ? (
+                    <p className="text-base font-black text-[var(--coral)]">
+                      {didPlayerWin ? 'Opponent Lost' : 'Opponent Won'}
+                    </p>
+                  ) : (
+                    <p className="text-sm text-[var(--muted)]">
+                      {players.length === 2 ? (isPlayerTurn ? 'They are watching your move.' : 'Their turn is active now.') : 'Invite a friend with the room code above.'}
+                    </p>
+                  )}
                 </motion.div>
               </div>
             </motion.div>
