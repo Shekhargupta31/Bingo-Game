@@ -1134,8 +1134,8 @@ export default function App() {
             >
               <defs>
                 <linearGradient id="bingoStrike" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#33c3c8" />
-                  <stop offset="100%" stopColor="#ff8a66" />
+                  <stop offset="0%" stopColor="#0b1114" />
+                  <stop offset="100%" stopColor="#1b2328" />
                 </linearGradient>
               </defs>
               {lineSegments.map((segment) => {
@@ -1148,7 +1148,7 @@ export default function App() {
                       y1={segment.y1}
                       x2={segment.x2}
                       y2={segment.y2}
-                      stroke="rgba(255,255,255,0.35)"
+                      stroke="rgba(255,255,255,0.12)"
                       strokeWidth="6"
                       strokeLinecap="round"
                       vectorEffect="non-scaling-stroke"
