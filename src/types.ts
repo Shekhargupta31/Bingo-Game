@@ -17,6 +17,7 @@ export interface GameState {
   completedLines: number;
   bingoLetters: string[];
   isGameOver: boolean;
+  isDraw: boolean;
   winner: string | null;
   currentTurn: string | null; // ID of the player whose turn it is
 }
