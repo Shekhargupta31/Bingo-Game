@@ -19,6 +19,7 @@ type RoomData = {
   pendingMove: {
     moveId: number;
     responses: Map<string, { completedLines: number; isWinner: boolean }>;
+    timeoutId: ReturnType<typeof setTimeout> | null;
   } | null;
 };
 
@@ -35,6 +36,35 @@ async function startServer() {
 
   // Socket.io logic
   const rooms = new Map<string, RoomData>();
+
+  const finalizePendingMove = (roomCode: string, room: RoomData) => {
+    if (!room.pendingMove) {
+      return;
+    }
+
+    if (room.pendingMove.timeoutId) {
+      clearTimeout(room.pendingMove.timeoutId);
+    }
+
+    const winners = room.players.filter((player) => room.pendingMove?.responses.get(player.id)?.isWinner);
+
+    room.pendingMove = null;
+
+    if (winners.length === 2) {
+      room.gameStarted = false;
+      io.to(roomCode).emit("game-over", { winner: null, isTie: true });
+      return;
+    }
+
+    if (winners.length === 1) {
+      room.gameStarted = false;
+      io.to(roomCode).emit("game-over", { winner: winners[0].name, isTie: false });
+      return;
+    }
+
+    room.currentTurn = (room.currentTurn + 1) % room.players.length;
+    io.to(roomCode).emit("turn-change", room.players[room.currentTurn].id);
+  };
 
   io.on("connection", (socket) => {
     console.log("User connected:", socket.id);
@@ -120,6 +150,12 @@ async function startServer() {
         room.pendingMove = {
           moveId: room.moveSequence,
           responses: new Map(),
+          timeoutId: setTimeout(() => {
+            const activeRoom = rooms.get(roomCode);
+            if (activeRoom) {
+              finalizePendingMove(roomCode, activeRoom);
+            }
+          }, 1500),
         };
 
         io.to(roomCode).emit("number-selected", { number, moveId: room.moveSequence });
@@ -138,24 +174,7 @@ async function startServer() {
         return;
       }
 
-      const winners = room.players.filter((player) => room.pendingMove?.responses.get(player.id)?.isWinner);
-
-      room.pendingMove = null;
-
-      if (winners.length === 2) {
-        room.gameStarted = false;
-        io.to(roomCode).emit("game-over", { winner: null, isTie: true });
-        return;
-      }
-
-      if (winners.length === 1) {
-        room.gameStarted = false;
-        io.to(roomCode).emit("game-over", { winner: winners[0].name, isTie: false });
-        return;
-      }
-
-      room.currentTurn = (room.currentTurn + 1) % 2;
-      io.to(roomCode).emit("turn-change", room.players[room.currentTurn].id);
+      finalizePendingMove(roomCode, room);
     });
 
     socket.on("play-again", (roomCode) => {
@@ -164,6 +183,9 @@ async function startServer() {
         room.selectedNumbers = [];
         room.gameStarted = true;
         room.currentTurn = 0;
+        if (room.pendingMove?.timeoutId) {
+          clearTimeout(room.pendingMove.timeoutId);
+        }
         room.pendingMove = null;
         io.to(roomCode).emit("game-reset", {
           turn: room.players[room.currentTurn].id
@@ -185,6 +207,9 @@ async function startServer() {
             room.gameStarted = false;
             room.currentTurn = 0;
             room.selectedNumbers = [];
+            if (room.pendingMove?.timeoutId) {
+              clearTimeout(room.pendingMove.timeoutId);
+            }
             room.pendingMove = null;
           }
         }
