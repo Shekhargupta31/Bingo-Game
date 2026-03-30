@@ -121,12 +121,45 @@ export default function App() {
         const firstRect = firstCell.getBoundingClientRect();
         const lastRect = lastCell.getBoundingClientRect();
 
+        const toPercentX = (value: number) => ((value - boardRect.left) / boardRect.width) * 100;
+        const toPercentY = (value: number) => ((value - boardRect.top) / boardRect.height) * 100;
+
+        if (pattern.type === 'row') {
+          return [{
+            key: getPatternKey(pattern),
+            x1: toPercentX(firstRect.left + firstRect.width * 0.12),
+            y1: toPercentY(firstRect.top + firstRect.height / 2),
+            x2: toPercentX(lastRect.right - lastRect.width * 0.12),
+            y2: toPercentY(lastRect.top + lastRect.height / 2),
+          }];
+        }
+
+        if (pattern.type === 'col') {
+          return [{
+            key: getPatternKey(pattern),
+            x1: toPercentX(firstRect.left + firstRect.width / 2),
+            y1: toPercentY(firstRect.top + firstRect.height * 0.12),
+            x2: toPercentX(lastRect.left + lastRect.width / 2),
+            y2: toPercentY(lastRect.bottom - lastRect.height * 0.12),
+          }];
+        }
+
+        if (pattern.index === 0) {
+          return [{
+            key: getPatternKey(pattern),
+            x1: toPercentX(firstRect.left + firstRect.width * 0.16),
+            y1: toPercentY(firstRect.top + firstRect.height * 0.16),
+            x2: toPercentX(lastRect.right - lastRect.width * 0.16),
+            y2: toPercentY(lastRect.bottom - lastRect.height * 0.16),
+          }];
+        }
+
         return [{
           key: getPatternKey(pattern),
-          x1: ((firstRect.left + firstRect.width / 2 - boardRect.left) / boardRect.width) * 100,
-          y1: ((firstRect.top + firstRect.height / 2 - boardRect.top) / boardRect.height) * 100,
-          x2: ((lastRect.left + lastRect.width / 2 - boardRect.left) / boardRect.width) * 100,
-          y2: ((lastRect.top + lastRect.height / 2 - boardRect.top) / boardRect.height) * 100,
+          x1: toPercentX(firstRect.right - firstRect.width * 0.16),
+          y1: toPercentY(firstRect.top + firstRect.height * 0.16),
+          x2: toPercentX(lastRect.left + lastRect.width * 0.16),
+          y2: toPercentY(lastRect.bottom - lastRect.height * 0.16),
         }];
       });
 
@@ -1107,19 +1140,32 @@ export default function App() {
               </defs>
               {lineSegments.map((segment) => {
                 return (
-                  <motion.line
-                    key={segment.key}
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    x1={segment.x1}
-                    y1={segment.y1}
-                    x2={segment.x2}
-                    y2={segment.y2}
-                    stroke="url(#bingoStrike)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
+                  <g key={segment.key}>
+                    <motion.line
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      x1={segment.x1}
+                      y1={segment.y1}
+                      x2={segment.x2}
+                      y2={segment.y2}
+                      stroke="rgba(255,255,255,0.35)"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <motion.line
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      x1={segment.x1}
+                      y1={segment.y1}
+                      x2={segment.x2}
+                      y2={segment.y2}
+                      stroke="url(#bingoStrike)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </g>
                 );
               })}
             </svg>
