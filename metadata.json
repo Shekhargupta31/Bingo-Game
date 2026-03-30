@@ -1,0 +1,5 @@
+{
+  "name": "Bingo Royale",
+  "description": "A complete multiplayer BINGO web game with real-time synchronization, computer AI, and polished UI.",
+  "requestFramePermissions": []
+}
