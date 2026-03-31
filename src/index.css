@@ -195,6 +195,734 @@ body {
   }
 }
 
+.login-scene {
+  background:
+    linear-gradient(125deg, rgba(84, 44, 155, 0.94), rgba(31, 94, 201, 0.9), rgba(207, 70, 145, 0.88));
+}
+
+.login-gradient-layer,
+.login-grid-layer,
+.login-aura,
+.login-balls-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.login-gradient-layer {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.18), transparent 20%),
+    radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.14), transparent 18%),
+    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.1), transparent 22%);
+  background-size: 140% 140%;
+  animation: loginGradientFlow 18s ease-in-out infinite;
+  opacity: 0.9;
+}
+
+.login-grid-layer {
+  opacity: 0.14;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(180deg, transparent, black 18%, black 82%, transparent);
+  animation: loginGridDrift 16s linear infinite;
+}
+
+.login-aura {
+  border-radius: 999px;
+  filter: blur(18px);
+  opacity: 0.55;
+}
+
+.login-aura-one {
+  inset: auto auto 12% -5%;
+  width: 22rem;
+  height: 22rem;
+  background: radial-gradient(circle, rgba(255, 205, 110, 0.3), rgba(255, 205, 110, 0) 72%);
+  animation: loginAuraFloatOne 14s ease-in-out infinite;
+}
+
+.login-aura-two {
+  inset: 8% -4% auto auto;
+  width: 26rem;
+  height: 26rem;
+  background: radial-gradient(circle, rgba(133, 194, 255, 0.34), rgba(133, 194, 255, 0) 74%);
+  animation: loginAuraFloatTwo 16s ease-in-out infinite;
+}
+
+.login-aura-three {
+  inset: 32% auto auto 34%;
+  width: 18rem;
+  height: 18rem;
+  background: radial-gradient(circle, rgba(255, 134, 196, 0.22), rgba(255, 134, 196, 0) 72%);
+  animation: loginAuraFloatThree 13s ease-in-out infinite;
+}
+
+.login-layout {
+  position: relative;
+}
+
+.login-title-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.login-title-letter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.92em;
+  font-size: clamp(3.4rem, 11vw, 6.4rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: 0.06em;
+  color: #fff7fc;
+  text-shadow:
+    0 0 18px rgba(255, 255, 255, 0.2),
+    0 0 34px rgba(255, 114, 182, 0.24),
+    0 10px 30px rgba(35, 16, 86, 0.45);
+  animation: loginTitleBounce 2.4s ease-in-out infinite;
+}
+
+.login-title-letter:nth-child(1) {
+  color: #ffd76d;
+}
+
+.login-title-letter:nth-child(2) {
+  color: #9fe7ff;
+}
+
+.login-title-letter:nth-child(3) {
+  color: #ffc0de;
+}
+
+.login-title-letter:nth-child(4) {
+  color: #b8fff4;
+}
+
+.login-title-letter:nth-child(5) {
+  color: #ffe6a0;
+}
+
+.login-tagline {
+  color: rgba(246, 242, 255, 0.82);
+  text-shadow: 0 10px 24px rgba(28, 18, 66, 0.36);
+}
+
+.login-showcase {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04)),
+    linear-gradient(180deg, rgba(28, 16, 69, 0.5), rgba(17, 26, 68, 0.26));
+  backdrop-filter: blur(20px);
+}
+
+.login-showcase::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 22%, rgba(255, 255, 255, 0.22), transparent 22%),
+    radial-gradient(circle at 80% 72%, rgba(255, 208, 93, 0.12), transparent 18%);
+  pointer-events: none;
+}
+
+.login-showcase-copy {
+  align-self: flex-start;
+}
+
+.login-showcase-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 249, 252, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.login-showcase-badge::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd76d, #ff7fbf);
+  box-shadow: 0 0 18px rgba(255, 127, 191, 0.4);
+}
+
+.login-mini-board {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  width: min(12rem, 45%);
+}
+
+.login-mini-board span {
+  display: flex;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: loginMiniBoardFloat 5.2s ease-in-out infinite;
+}
+
+.login-mini-board span:nth-child(odd) {
+  animation-delay: 0.35s;
+}
+
+.login-card {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06)),
+    linear-gradient(180deg, rgba(27, 18, 72, 0.86), rgba(18, 24, 60, 0.84));
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 24px 80px rgba(13, 8, 38, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: loginCardFloat 5.8s ease-in-out infinite;
+}
+
+.login-card-glow {
+  position: absolute;
+  inset: -18% auto auto -10%;
+  width: 14rem;
+  height: 14rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 214, 112, 0.22), rgba(255, 214, 112, 0) 72%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.login-trophy-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 5.2rem;
+  height: 5.2rem;
+  border-radius: 1.65rem;
+  background: linear-gradient(145deg, #ffb46b, #ff7ca7);
+  box-shadow:
+    0 18px 34px rgba(255, 120, 167, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.login-kicker {
+  margin-bottom: 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+.login-input {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 14px 30px rgba(8, 10, 31, 0.18);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.login-input:focus {
+  border-color: rgba(159, 231, 255, 0.6);
+  box-shadow:
+    0 0 0 3px rgba(159, 231, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 36px rgba(8, 10, 31, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.login-primary-button,
+.login-guest-button {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.login-primary-button {
+  background: linear-gradient(135deg, #ff8ec4, #7b7fff 48%, #55d8ff);
+  box-shadow:
+    0 16px 36px rgba(79, 84, 215, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  animation: loginButtonPulse 2.4s ease-in-out infinite;
+}
+
+.login-primary-button::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  pointer-events: none;
+}
+
+.login-guest-button {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.login-guest-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.login-button-stack {
+  position: relative;
+}
+
+.login-continue-button {
+  transform-origin: center bottom;
+  animation:
+    loginButtonPulse 2.4s ease-in-out infinite,
+    loginButtonPressLoop 8.6s ease-in-out infinite;
+}
+
+.login-button-spark {
+  position: absolute;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0));
+  opacity: 0;
+  filter: blur(0.4px);
+  animation: loginSparkBurst 8.6s ease-in-out infinite;
+}
+
+.login-button-spark-one { top: 18%; right: 18%; }
+.login-button-spark-two { top: 40%; right: 10%; animation-delay: 0.08s; }
+.login-button-spark-three { bottom: 22%; left: 16%; animation-delay: 0.14s; }
+.login-button-spark-four { bottom: 38%; left: 10%; animation-delay: 0.2s; }
+
+.login-balls-layer {
+  overflow: hidden;
+}
+
+.login-bingo-ball {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 999px;
+  font-weight: 900;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 18px 30px rgba(18, 10, 56, 0.28),
+    inset 0 2px 0 rgba(255, 255, 255, 0.26);
+  backdrop-filter: blur(8px);
+}
+
+.login-bingo-ball::before {
+  content: "";
+  position: absolute;
+  inset: 0.4rem;
+  border-radius: inherit;
+  border: 1px dashed rgba(255, 255, 255, 0.24);
+}
+
+.login-bingo-ball span {
+  position: relative;
+  z-index: 1;
+}
+
+.login-ball-one {
+  top: 14%;
+  left: 6%;
+  background: linear-gradient(145deg, rgba(255, 212, 112, 0.72), rgba(255, 125, 143, 0.82));
+  animation: loginBallFloatOne 17s ease-in-out infinite;
+}
+
+.login-ball-two {
+  top: 16%;
+  right: 11%;
+  background: linear-gradient(145deg, rgba(130, 214, 255, 0.78), rgba(114, 118, 255, 0.8));
+  animation: loginBallFloatTwo 20s ease-in-out infinite;
+}
+
+.login-ball-three {
+  top: 42%;
+  left: 12%;
+  background: linear-gradient(145deg, rgba(255, 152, 208, 0.8), rgba(171, 115, 255, 0.72));
+  animation: loginBallFloatThree 19s ease-in-out infinite;
+}
+
+.login-ball-four {
+  top: 50%;
+  right: 7%;
+  background: linear-gradient(145deg, rgba(123, 255, 220, 0.72), rgba(94, 168, 255, 0.74));
+  animation: loginBallFloatFour 18s ease-in-out infinite;
+}
+
+.login-ball-five {
+  bottom: 16%;
+  left: 22%;
+  background: linear-gradient(145deg, rgba(255, 210, 125, 0.78), rgba(255, 127, 191, 0.78));
+  animation: loginBallFloatFive 16s ease-in-out infinite;
+}
+
+.login-ball-six {
+  bottom: 12%;
+  right: 18%;
+  background: linear-gradient(145deg, rgba(151, 208, 255, 0.78), rgba(255, 164, 214, 0.72));
+  animation: loginBallFloatSix 21s ease-in-out infinite;
+}
+
+.login-guide-boy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2.5rem;
+  z-index: 2;
+  height: min(19rem, 28vh);
+  pointer-events: none;
+  animation: guideBoyTraverse 8.6s ease-in-out infinite;
+}
+
+.guide-boy-shadow {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 2.2rem;
+  width: 5.6rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: rgba(15, 11, 36, 0.28);
+  filter: blur(8px);
+  animation: guideShadowShift 8.6s ease-in-out infinite;
+}
+
+.guide-boy-character {
+  position: absolute;
+  left: 0;
+  bottom: 1.2rem;
+  width: 7rem;
+  height: 12rem;
+  transform-origin: center bottom;
+  animation:
+    guideBodyBob 0.9s ease-in-out infinite,
+    guideLookForm 8.6s ease-in-out infinite;
+}
+
+.guide-boy-head {
+  position: absolute;
+  top: 0;
+  left: 1.55rem;
+  width: 3.8rem;
+  height: 3.95rem;
+  border-radius: 48% 48% 46% 46%;
+  background: linear-gradient(180deg, #ffdcb3, #f3ba8a);
+  box-shadow: inset 0 -0.12rem 0 rgba(201, 123, 83, 0.2);
+}
+
+.guide-boy-hair {
+  position: absolute;
+  top: -0.25rem;
+  left: 0.3rem;
+  width: 3.2rem;
+  height: 1.6rem;
+  border-radius: 65% 40% 45% 35%;
+  background: linear-gradient(180deg, #3c2545, #241530);
+}
+
+.guide-boy-eye,
+.guide-boy-smile {
+  position: absolute;
+}
+
+.guide-boy-eye {
+  top: 1.6rem;
+  width: 0.36rem;
+  height: 0.36rem;
+  border-radius: 999px;
+  background: #332240;
+}
+
+.guide-boy-eye-left { left: 1.15rem; }
+.guide-boy-eye-right { right: 1.15rem; }
+
+.guide-boy-smile {
+  left: 1.3rem;
+  bottom: 0.85rem;
+  width: 1.15rem;
+  height: 0.55rem;
+  border-bottom: 0.14rem solid #b35e58;
+  border-radius: 0 0 1rem 1rem;
+}
+
+.guide-boy-torso {
+  position: absolute;
+  top: 3.35rem;
+  left: 1.4rem;
+  width: 4.15rem;
+  height: 4rem;
+  border-radius: 1.3rem 1.3rem 1rem 1rem;
+  background: linear-gradient(180deg, #ffd76d, #ff9e5f);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 8px 22px rgba(58, 30, 72, 0.14);
+}
+
+.guide-boy-arm,
+.guide-boy-leg {
+  position: absolute;
+  display: block;
+  background: linear-gradient(180deg, #ffdcb3, #efb487);
+  transform-origin: top center;
+}
+
+.guide-boy-arm {
+  top: 0.45rem;
+  width: 0.72rem;
+  height: 2.8rem;
+  border-radius: 999px;
+}
+
+.guide-boy-arm-left {
+  left: -0.42rem;
+  animation: guideLeftArmWalk 0.9s ease-in-out infinite;
+}
+
+.guide-boy-arm-right {
+  right: -0.45rem;
+  animation:
+    guideRightArmWave 8.6s ease-in-out infinite,
+    guideRightArmWalk 0.9s ease-in-out infinite;
+}
+
+.guide-boy-legs {
+  position: absolute;
+  left: 2rem;
+  bottom: 0;
+  width: 3rem;
+  height: 4rem;
+}
+
+.guide-boy-leg {
+  bottom: 0;
+  width: 0.82rem;
+  height: 3.45rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #5f7cff, #3650c9);
+}
+
+.guide-boy-leg-left {
+  left: 0.25rem;
+  animation: guideLegLeftWalk 0.9s ease-in-out infinite;
+}
+
+.guide-boy-leg-right {
+  right: 0.25rem;
+  animation: guideLegRightWalk 0.9s ease-in-out infinite;
+}
+
+.guide-sparkle {
+  position: absolute;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(255,255,255,0));
+  opacity: 0;
+  animation: guideSparkleBurst 8.6s ease-in-out infinite;
+}
+
+.sparkle-one { right: 22%; bottom: 7.8rem; }
+.sparkle-two { right: 20%; bottom: 9rem; animation-delay: 0.08s; }
+.sparkle-three { right: 24%; bottom: 8.7rem; animation-delay: 0.16s; }
+.sparkle-four { right: 18%; bottom: 8rem; animation-delay: 0.24s; }
+
+.login-credit {
+  color: rgba(248, 241, 255, 0.8);
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.08),
+    0 0 18px rgba(255, 165, 214, 0.18);
+  animation: loginCreditGlow 3.8s ease-in-out infinite;
+}
+
+@keyframes loginGradientFlow {
+  0%, 100% { transform: scale(1) translate3d(0, 0, 0); }
+  50% { transform: scale(1.06) translate3d(-1.5%, 1.5%, 0); }
+}
+
+@keyframes loginGridDrift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-1rem, 1rem, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes loginAuraFloatOne {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(1rem, -1rem, 0) scale(1.08); }
+}
+
+@keyframes loginAuraFloatTwo {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-1.4rem, 1.2rem, 0) scale(1.06); }
+}
+
+@keyframes loginAuraFloatThree {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0.8rem, -1.2rem, 0) scale(1.1); }
+}
+
+@keyframes loginTitleBounce {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  12% { transform: translateY(-0.36rem) scale(1.06); filter: brightness(1.1); }
+  24% { transform: translateY(0.08rem) scale(0.98); filter: brightness(0.98); }
+  36% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
+@keyframes loginMiniBoardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.35rem); }
+}
+
+@keyframes loginCardFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.45rem); }
+}
+
+@keyframes loginButtonPulse {
+  0%, 100% {
+    box-shadow:
+      0 16px 36px rgba(79, 84, 215, 0.34),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 20px 40px rgba(111, 118, 255, 0.42),
+      0 0 26px rgba(136, 126, 255, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+
+@keyframes loginButtonPressLoop {
+  0%, 68%, 100% { transform: translateY(0) scale(1); }
+  73% { transform: translateY(0.18rem) scale(0.985); }
+  77% { transform: translateY(0.04rem) scale(0.996); }
+}
+
+@keyframes loginSparkBurst {
+  0%, 70%, 100% { transform: translate3d(0, 0, 0) scale(0.2); opacity: 0; }
+  74% { transform: translate3d(-0.1rem, -0.4rem, 0) scale(1); opacity: 0.92; }
+  82% { transform: translate3d(0.25rem, -0.9rem, 0) scale(0.3); opacity: 0; }
+}
+
+@keyframes loginBallFloatOne {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(2rem, 1.4rem, 0) rotate(12deg); }
+}
+
+@keyframes loginBallFloatTwo {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(-1.5rem, 2rem, 0) rotate(-14deg); }
+}
+
+@keyframes loginBallFloatThree {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(1.3rem, -1.8rem, 0) rotate(10deg); }
+}
+
+@keyframes loginBallFloatFour {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(-1.8rem, -1rem, 0) rotate(-8deg); }
+}
+
+@keyframes loginBallFloatFive {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(1.4rem, -1.1rem, 0) rotate(9deg); }
+}
+
+@keyframes loginBallFloatSix {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(-1.2rem, 1.4rem, 0) rotate(-11deg); }
+}
+
+@keyframes guideBoyTraverse {
+  0%, 100% { transform: translateX(4vw); }
+  22% { transform: translateX(10vw); }
+  50% { transform: translateX(28vw); }
+  62% { transform: translateX(40vw); }
+  72% { transform: translateX(48vw); }
+  82% { transform: translateX(34vw); }
+}
+
+@keyframes guideShadowShift {
+  0%, 100% { transform: scaleX(1); opacity: 0.22; }
+  50% { transform: scaleX(1.08); opacity: 0.3; }
+}
+
+@keyframes guideBodyBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.22rem); }
+}
+
+@keyframes guideLookForm {
+  0%, 22% { transform: rotate(0deg); }
+  24%, 68% { transform: rotate(3deg); }
+  72%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes guideRightArmWave {
+  0%, 8% { transform: rotate(-12deg); }
+  11% { transform: rotate(-62deg); }
+  14% { transform: rotate(-18deg); }
+  17% { transform: rotate(-64deg); }
+  20%, 100% { transform: rotate(20deg); }
+  72%, 78% { transform: rotate(-56deg); }
+  82%, 100% { transform: rotate(16deg); }
+}
+
+@keyframes guideLeftArmWalk {
+  0%, 100% { transform: rotate(18deg); }
+  50% { transform: rotate(-18deg); }
+}
+
+@keyframes guideRightArmWalk {
+  0%, 100% { margin-top: 0; }
+  50% { margin-top: 0.08rem; }
+}
+
+@keyframes guideLegLeftWalk {
+  0%, 100% { transform: rotate(14deg); }
+  50% { transform: rotate(-16deg); }
+}
+
+@keyframes guideLegRightWalk {
+  0%, 100% { transform: rotate(-16deg); }
+  50% { transform: rotate(14deg); }
+}
+
+@keyframes guideSparkleBurst {
+  0%, 70%, 100% { transform: scale(0.2); opacity: 0; }
+  74% { transform: translateY(-0.4rem) scale(1); opacity: 0.86; }
+  82% { transform: translateY(-1rem) scale(0.3); opacity: 0; }
+}
+
+@keyframes loginCreditGlow {
+  0%, 100% { opacity: 0.76; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.08); }
+}
+
 .mode-stage {
   position: relative;
   overflow: hidden;
@@ -480,6 +1208,66 @@ body {
 }
 
 @media (max-width: 640px) {
+  .login-scene {
+    padding-bottom: 10.5rem;
+  }
+
+  .login-showcase {
+    display: none;
+  }
+
+  .login-bingo-ball {
+    width: 3.25rem;
+    height: 3.25rem;
+    font-size: 0.95rem;
+  }
+
+  .login-guide-boy {
+    bottom: 4.5rem;
+    height: 10rem;
+    animation: guideBoyTraverseMobile 8.6s ease-in-out infinite;
+  }
+
+  .guide-boy-character {
+    width: 5.8rem;
+    height: 9.5rem;
+  }
+
+  .guide-boy-head {
+    left: 1.25rem;
+    width: 3.15rem;
+    height: 3.25rem;
+  }
+
+  .guide-boy-torso {
+    top: 2.85rem;
+    left: 1.15rem;
+    width: 3.55rem;
+    height: 3.4rem;
+  }
+
+  .guide-boy-legs {
+    left: 1.55rem;
+    width: 2.6rem;
+    height: 3.4rem;
+  }
+
+  .guide-boy-leg {
+    height: 2.85rem;
+  }
+
+  .guide-boy-shadow {
+    left: 1.5rem;
+    width: 4.6rem;
+  }
+
+  .sparkle-one,
+  .sparkle-two,
+  .sparkle-three,
+  .sparkle-four {
+    right: 10%;
+  }
+
   .mode-orb-one {
     width: 12rem;
     height: 12rem;
@@ -513,4 +1301,31 @@ body {
     border-bottom-width: 3.8rem;
     right: 14%;
   }
+}
+
+@media (max-width: 1024px) {
+  .login-content {
+    max-width: 42rem;
+  }
+
+  .login-guide-boy {
+    bottom: 1.4rem;
+    animation: guideBoyTraverseTablet 8.6s ease-in-out infinite;
+  }
+}
+
+@keyframes guideBoyTraverseTablet {
+  0%, 100% { transform: translateX(6vw); }
+  28% { transform: translateX(14vw); }
+  58% { transform: translateX(26vw); }
+  74% { transform: translateX(34vw); }
+  86% { transform: translateX(20vw); }
+}
+
+@keyframes guideBoyTraverseMobile {
+  0%, 100% { transform: translateX(0.8rem); }
+  28% { transform: translateX(1.8rem); }
+  56% { transform: translateX(3.4rem); }
+  74% { transform: translateX(5.2rem); }
+  88% { transform: translateX(2.6rem); }
 }

@@ -32,6 +32,16 @@ type LineSegment = {
   y2: number;
 };
 
+const LOGIN_TITLE_LETTERS = ['B', 'I', 'N', 'G', 'O'];
+const LOGIN_BINGO_BALLS = [
+  { number: 7, className: 'login-ball-one' },
+  { number: 13, className: 'login-ball-two' },
+  { number: 22, className: 'login-ball-three' },
+  { number: 5, className: 'login-ball-four' },
+  { number: 18, className: 'login-ball-five' },
+  { number: 25, className: 'login-ball-six' },
+];
+
 export default function App() {
   // User State
   const [playerName, setPlayerName] = useState<string>(localStorage.getItem('bingo_name') || '');
@@ -618,55 +628,161 @@ export default function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="app-shell flex items-center justify-center p-4 font-sans">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="panel-card panel-card-strong mesh-accent w-full max-w-md rounded-[2rem] p-8"
-        >
-          <div className="flex justify-center mb-6">
-            <div className="rounded-[1.5rem] bg-[var(--coral)] p-4 shadow-lg shadow-[rgba(217,107,79,0.25)]">
-              <Trophy className="h-12 w-12 text-[#fffaf2]" />
+      <div className="login-scene app-shell relative overflow-hidden px-4 py-6 font-sans sm:px-6 sm:py-8">
+        <div className="login-gradient-layer" />
+        <div className="login-grid-layer" />
+        <div className="login-aura login-aura-one" />
+        <div className="login-aura login-aura-two" />
+        <div className="login-aura login-aura-three" />
+
+        <div className="login-balls-layer" aria-hidden="true">
+          {LOGIN_BINGO_BALLS.map((ball) => (
+            <div key={ball.number} className={`login-bingo-ball ${ball.className}`}>
+              <span>{ball.number}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="login-layout relative z-[2] mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="mb-8 flex flex-col items-center text-center sm:mb-10"
+          >
+            <div className="login-title-wrap">
+              {LOGIN_TITLE_LETTERS.map((letter, index) => (
+                <span
+                  key={letter}
+                  className="login-title-letter"
+                  style={{ animationDelay: `${index * 0.18}s` }}
+                >
+                  {letter}
+                </span>
+              ))}
+            </div>
+            <p className="login-tagline mt-4 max-w-2xl text-sm sm:text-base">
+              Step into a playful Bingo lobby with glowing cards, floating balls, and a guide ready to point you straight into the game.
+            </p>
+          </motion.div>
+
+          <div className="login-content relative flex w-full flex-col items-center justify-center gap-8 lg:flex-row lg:items-stretch lg:gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.65, delay: 0.08, ease: 'easeOut' }}
+              className="login-showcase panel-card relative hidden min-h-[25rem] flex-1 overflow-hidden rounded-[2.25rem] border border-white/12 px-8 py-8 lg:flex"
+            >
+              <div className="login-showcase-copy relative z-[1] max-w-sm">
+                <div className="login-showcase-badge">Animated Lobby</div>
+                <h2 className="mt-5 text-4xl font-black leading-tight text-white">
+                  A lively Bingo entrance made to feel welcoming from the first second.
+                </h2>
+                <p className="mt-4 text-base leading-7 text-white/72">
+                  Floating balls, shifting light, and a playful guide bring motion to the screen while keeping the path into the game simple and clear.
+                </p>
+              </div>
+
+              <div className="login-mini-board" aria-hidden="true">
+                {Array.from({ length: 9 }, (_, index) => (
+                  <span key={index}>{index + 1}</span>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 22 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.14, ease: 'easeOut' }}
+              className="login-card panel-card panel-card-strong relative w-full max-w-md overflow-hidden rounded-[2.25rem] p-6 sm:p-8"
+            >
+              <div className="login-card-glow" />
+              <div className="relative z-[1] flex justify-center">
+                <div className="login-trophy-wrap">
+                  <Trophy className="h-11 w-11 text-[#fffaf2] sm:h-12 sm:w-12" />
+                </div>
+              </div>
+
+              <div className="relative z-[1] mt-5 text-center">
+                <p className="login-kicker">Welcome Player</p>
+                <h2 className="text-2xl font-black text-white sm:text-3xl">Login To Start Playing</h2>
+                <p className="mt-2 text-sm leading-6 text-white/68">
+                  Enter your username or jump in as a guest. Your guide will show you the way.
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="relative z-[1] mt-8 space-y-4">
+                <label className="block">
+                  <span className="sr-only">Enter Username</span>
+                  <input
+                    type="text"
+                    placeholder="Enter Username"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                    className="login-input w-full rounded-[1.6rem] border px-5 py-4 text-base text-white placeholder:text-white/45 focus:outline-none"
+                    required
+                  />
+                </label>
+
+                <div className="login-button-stack relative">
+                  <button
+                    type="submit"
+                    className="interactive-glow login-primary-button login-continue-button relative flex min-h-14 w-full items-center justify-center overflow-hidden rounded-[1.55rem] px-6 py-4 text-base font-bold text-white"
+                  >
+                    <span className="relative z-[2]">Continue</span>
+                    <span className="login-button-spark login-button-spark-one" aria-hidden="true" />
+                    <span className="login-button-spark login-button-spark-two" aria-hidden="true" />
+                    <span className="login-button-spark login-button-spark-three" aria-hidden="true" />
+                    <span className="login-button-spark login-button-spark-four" aria-hidden="true" />
+                  </button>
+                </div>
+
+                <div className="relative flex items-center py-1">
+                  <div className="flex-grow border-t border-white/12"></div>
+                  <span className="mx-4 flex-shrink text-sm font-semibold tracking-[0.32em] text-white/45">OR</span>
+                  <div className="flex-grow border-t border-white/12"></div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleGuestLogin}
+                  className="interactive-glow login-guest-button flex min-h-14 w-full items-center justify-center rounded-[1.55rem] px-6 py-4 text-base font-semibold text-white/92"
+                >
+                  Continue as Guest
+                </button>
+              </form>
+            </motion.div>
+          </div>
+        </div>
+
+        <div className="login-guide-boy" aria-hidden="true">
+          <div className="guide-sparkle sparkle-one" />
+          <div className="guide-sparkle sparkle-two" />
+          <div className="guide-sparkle sparkle-three" />
+          <div className="guide-sparkle sparkle-four" />
+          <div className="guide-boy-shadow" />
+          <div className="guide-boy-character">
+            <div className="guide-boy-head">
+              <span className="guide-boy-hair" />
+              <span className="guide-boy-eye guide-boy-eye-left" />
+              <span className="guide-boy-eye guide-boy-eye-right" />
+              <span className="guide-boy-smile" />
+            </div>
+            <div className="guide-boy-torso">
+              <span className="guide-boy-arm guide-boy-arm-left" />
+              <span className="guide-boy-arm guide-boy-arm-right" />
+            </div>
+            <div className="guide-boy-legs">
+              <span className="guide-boy-leg guide-boy-leg-left" />
+              <span className="guide-boy-leg guide-boy-leg-right" />
             </div>
           </div>
-          <h1 className="mb-2 text-center text-4xl font-black tracking-tight text-[var(--ink)]">BINGO</h1>
-          <p className="mb-8 text-center text-[var(--muted)]">A warmer, sharper game night vibe with instant multiplayer rooms.</p>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="text"
-              placeholder="Your Name"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              className="w-full rounded-2xl border border-[var(--line)] bg-[var(--surface-soft)] px-4 py-3 text-[var(--ink)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-[var(--teal)] transition-all"
-              required
-            />
-            <button
-              type="submit"
-              className="interactive-glow w-full rounded-2xl bg-[var(--teal)] py-3 font-semibold text-white transition-all shadow-lg shadow-[rgba(22,124,128,0.2)] hover:bg-[var(--teal-deep)]"
-            >
-              Join Game
-            </button>
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-[var(--line)]"></div>
-              <span className="mx-4 flex-shrink text-sm text-[var(--muted)]">OR</span>
-              <div className="flex-grow border-t border-[var(--line)]"></div>
-            </div>
-            <button
-              type="button"
-              onClick={handleGuestLogin}
-              className="interactive-glow w-full rounded-2xl bg-[var(--surface-muted)] py-3 font-semibold text-[var(--ink)] transition-all hover:bg-[#1b4050]"
-            >
-              Continue as Guest
-            </button>
-          </form>
-        </motion.div>
+        </div>
 
         <p
-          className="fixed bottom-4 right-4 text-sm font-semibold tracking-[0.16em] text-[rgba(218,232,236,0.78)] transition duration-200 hover:text-[rgba(236,244,246,0.92)] hover:underline hover:decoration-[rgba(218,232,236,0.38)] hover:underline-offset-4 sm:bottom-5 sm:right-5"
-          style={{ textShadow: '0 0 14px rgba(218,232,236,0.08)' }}
+          className="login-credit fixed bottom-4 right-4 z-[3] text-xs font-semibold tracking-[0.14em] sm:bottom-5 sm:right-5 sm:text-sm"
         >
-          Crafted by Shekhar (★‿★)
+          Crafted by Shekhar (✷‿✷)
         </p>
       </div>
     );
