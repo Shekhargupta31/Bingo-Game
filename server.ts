@@ -14,6 +14,7 @@ type RoomData = {
   players: Player[];
   currentTurn: number;
   gameStarted: boolean;
+  winnerName: string | null;
   selectedNumbers: number[];
   moveSequence: number;
   pendingMove: {
@@ -37,6 +38,22 @@ async function startServer() {
   // Socket.io logic
   const rooms = new Map<string, RoomData>();
 
+  const broadcastGameWon = (roomCode: string, room: RoomData, winnerName: string) => {
+    if (room.winnerName) {
+      return;
+    }
+
+    room.winnerName = winnerName;
+    room.gameStarted = false;
+
+    if (room.pendingMove?.timeoutId) {
+      clearTimeout(room.pendingMove.timeoutId);
+    }
+
+    room.pendingMove = null;
+    io.to(roomCode).emit("gameWon", { winner: winnerName });
+  };
+
   const finalizePendingMove = (roomCode: string, room: RoomData) => {
     if (!room.pendingMove) {
       return;
@@ -50,15 +67,12 @@ async function startServer() {
 
     room.pendingMove = null;
 
-    if (winners.length === 2) {
-      room.gameStarted = false;
-      io.to(roomCode).emit("gameOver", { winner: null, isTie: true });
+    if (!room.gameStarted || room.winnerName) {
       return;
     }
 
     if (winners.length === 1) {
-      room.gameStarted = false;
-      io.to(roomCode).emit("gameOver", { winner: winners[0].name, isTie: false });
+      broadcastGameWon(roomCode, room, winners[0].name);
       return;
     }
 
@@ -80,6 +94,7 @@ async function startServer() {
         players: [{ id: socket.id, name: playerName, score: 0 }],
         currentTurn: 0,
         gameStarted: false,
+        winnerName: null,
         selectedNumbers: [],
         moveSequence: 0,
         pendingMove: null,
@@ -129,6 +144,10 @@ async function startServer() {
     socket.on("make-move", ({ roomCode, number }) => {
       const room = rooms.get(roomCode);
       if (room && room.gameStarted) {
+        if (room.winnerName) {
+          return;
+        }
+
         if (room.pendingMove) {
           socket.emit("room-error", "Wait for the current move to finish");
           return;
@@ -177,11 +196,26 @@ async function startServer() {
       finalizePendingMove(roomCode, room);
     });
 
+    socket.on("playerWon", ({ roomId, playerName }: { roomId: string; playerName: string }) => {
+      const room = rooms.get(roomId);
+      if (!room || !room.gameStarted || room.winnerName) {
+        return;
+      }
+
+      const winner = room.players.find((player) => player.name === playerName);
+      if (!winner) {
+        return;
+      }
+
+      broadcastGameWon(roomId, room, winner.name);
+    });
+
     socket.on("play-again", (roomCode) => {
       const room = rooms.get(roomCode);
       if (room && room.players.length === 2) {
         room.selectedNumbers = [];
         room.gameStarted = true;
+        room.winnerName = null;
         room.currentTurn = 0;
         if (room.pendingMove?.timeoutId) {
           clearTimeout(room.pendingMove.timeoutId);
@@ -205,6 +239,7 @@ async function startServer() {
           } else {
             io.to(roomCode).emit("player-left");
             room.gameStarted = false;
+            room.winnerName = null;
             room.currentTurn = 0;
             room.selectedNumbers = [];
             if (room.pendingMove?.timeoutId) {

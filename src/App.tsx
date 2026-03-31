@@ -220,6 +220,18 @@ export default function App() {
     });
   };
 
+  const emitPlayerWon = useCallback(() => {
+    const { gameMode, playerName, activeRoomCode } = stateRef.current;
+    if (gameMode !== 'multi' || !activeRoomCode || !socketRef.current) {
+      return;
+    }
+
+    socketRef.current.emit('playerWon', {
+      roomId: activeRoomCode,
+      playerName,
+    });
+  }, []);
+
   const checkWin = useCallback((marked: boolean[][]) => {
     return checkLines(marked) >= 5;
   }, []);
@@ -334,6 +346,10 @@ export default function App() {
             winner: playerName
           };
         }
+
+        if (gameMode === 'multi') {
+          emitPlayerWon();
+        }
       }
 
       return {
@@ -348,7 +364,7 @@ export default function App() {
     });
 
     return markSummary;
-  }, [checkWin, triggerWinEffects]);
+  }, [checkWin, emitPlayerWon, triggerWinEffects]);
 
   // Initialize Socket
   useEffect(() => {
@@ -431,16 +447,12 @@ export default function App() {
       setGameState(prev => ({ ...prev, currentTurn: nextTurnId }));
     });
 
-    socket.on('gameOver', ({ winner, isTie }: { winner: string | null; isTie: boolean }) => {
-      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: isTie, winner, currentTurn: null }));
+    socket.on('gameWon', ({ winner }: { winner: string }) => {
+      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: false, winner, currentTurn: null }));
 
-      if (isTie) {
-        return;
-      }
-
-      console.log('[Bingo] gameOver received, calling triggerWinEffects()', { winner });
+      console.log('[Bingo] gameWon received, calling triggerWinEffects()', { winner });
       triggerWinEffects();
-      console.log('[Bingo] triggerWinEffects() finished after gameOver', { winner });
+      console.log('[Bingo] triggerWinEffects() finished after gameWon', { winner });
 
       if (winner === stateRef.current.playerName) {
         updateScore('player');
