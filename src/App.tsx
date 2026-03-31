@@ -74,6 +74,7 @@ export default function App() {
   const gameStateRef = useRef(gameState);
   const victoryAudioRef = useRef<HTMLAudioElement | null>(null);
   const victoryAudioTimeoutRef = useRef<number | null>(null);
+  const bingoStopTimeoutRef = useRef<number | null>(null);
   const boardFrameRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   useEffect(() => {
@@ -91,6 +92,10 @@ export default function App() {
         victoryAudioRef.current.pause();
         victoryAudioRef.current.currentTime = 0;
       }
+      if (bingoStopTimeoutRef.current) {
+        window.clearTimeout(bingoStopTimeoutRef.current);
+      }
+      window.speechSynthesis?.cancel();
     };
   }, []);
 
@@ -248,9 +253,9 @@ export default function App() {
         marked: newMarked,
         completedLines: newLines,
         bingoLetters: newBingoLetters,
-        isGameOver: isWinner ? true : prev.isGameOver,
+        isGameOver: gameMode === 'single' && isWinner ? true : prev.isGameOver,
         isDraw: false,
-        winner: isWinner ? playerName : prev.winner
+        winner: gameMode === 'single' && isWinner ? playerName : prev.winner
       };
     });
 
@@ -334,6 +339,17 @@ export default function App() {
 
     socket.on('turn-change', (nextTurnId: string) => {
       setGameState(prev => ({ ...prev, currentTurn: nextTurnId }));
+    });
+
+    socket.on('gameWon', ({ winner }: { winner: string }) => {
+      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: false, winner, currentTurn: null }));
+      triggerWin();
+
+      if (winner === stateRef.current.playerName) {
+        updateScore('player');
+      } else {
+        updateScore('opponent');
+      }
     });
 
     socket.on('game-over', ({ winner, isTie }: { winner: string | null; isTie: boolean }) => {
@@ -503,30 +519,53 @@ export default function App() {
       colors: ['#33c3c8', '#f5c76b', '#ff8a66']
     });
 
-    if (soundEnabled) {
-      if (victoryAudioTimeoutRef.current) {
-        window.clearTimeout(victoryAudioTimeoutRef.current);
-      }
-
-      if (victoryAudioRef.current) {
-        victoryAudioRef.current.pause();
-        victoryAudioRef.current.currentTime = 0;
-      }
-
-      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3');
-      audio.currentTime = 0;
-      victoryAudioRef.current = audio;
-      audio.play().catch(() => {});
-
-      victoryAudioTimeoutRef.current = window.setTimeout(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        if (victoryAudioRef.current === audio) {
-          victoryAudioRef.current = null;
-        }
-        victoryAudioTimeoutRef.current = null;
-      }, 3000);
+    if (!soundEnabled) {
+      return;
     }
+
+    if (victoryAudioTimeoutRef.current) {
+      window.clearTimeout(victoryAudioTimeoutRef.current);
+    }
+
+    if (bingoStopTimeoutRef.current) {
+      window.clearTimeout(bingoStopTimeoutRef.current);
+    }
+
+    if (victoryAudioRef.current) {
+      victoryAudioRef.current.pause();
+      victoryAudioRef.current.currentTime = 0;
+    }
+
+    window.speechSynthesis?.cancel();
+
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3');
+    audio.currentTime = 0;
+    audio.loop = true;
+    victoryAudioRef.current = audio;
+    audio.play().catch(() => {});
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance('BINGO STOP');
+      utterance.rate = 0.9;
+      utterance.pitch = 0.9;
+      utterance.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    victoryAudioTimeoutRef.current = window.setTimeout(() => {
+      audio.pause();
+      audio.currentTime = 0;
+      if (victoryAudioRef.current === audio) {
+        victoryAudioRef.current = null;
+      }
+      victoryAudioTimeoutRef.current = null;
+    }, 3000);
+
+    bingoStopTimeoutRef.current = window.setTimeout(() => {
+      window.speechSynthesis?.cancel();
+      bingoStopTimeoutRef.current = null;
+    }, 3000);
   };
 
   const updateScore = (who: 'player' | 'opponent') => {
@@ -567,7 +606,7 @@ export default function App() {
               <Trophy className="h-12 w-12 text-[#fffaf2]" />
             </div>
           </div>
-          <h1 className="mb-2 text-center text-4xl font-black tracking-tight text-[var(--ink)]">Bingo Royale</h1>
+          <h1 className="mb-2 text-center text-4xl font-black tracking-tight text-[var(--ink)]">BINGO</h1>
           <p className="mb-8 text-center text-[var(--muted)]">A warmer, sharper game night vibe with instant multiplayer rooms.</p>
           
           <form onSubmit={handleLogin} className="space-y-4">
@@ -600,8 +639,11 @@ export default function App() {
           </form>
         </motion.div>
 
-        <p className="pointer-events-none fixed bottom-4 right-4 text-xs tracking-[0.18em] text-[var(--muted)]/80 sm:bottom-5 sm:right-5">
-          Crafted by Shekhar
+        <p
+          className="fixed bottom-4 right-4 text-sm font-semibold tracking-[0.16em] text-[rgba(218,232,236,0.78)] transition duration-200 hover:text-[rgba(236,244,246,0.92)] hover:underline hover:decoration-[rgba(218,232,236,0.38)] hover:underline-offset-4 sm:bottom-5 sm:right-5"
+          style={{ textShadow: '0 0 14px rgba(218,232,236,0.08)' }}
+        >
+          Crafted by Shekhar (★‿★)
         </p>
       </div>
     );
@@ -1238,7 +1280,7 @@ export default function App() {
                 <p className="mb-5 text-center text-[var(--muted)]">
                   {gameState.isDraw
                     ? 'Both boards hit five lines on the same move. The round ends as a tie.'
-                    : (gameState.winner === playerName ? 'Your completed lines are locked in with a victory strike.' : 'Reset and chase a faster five-line finish.')}
+                    : (<><strong className="font-black text-[var(--ink)]">{gameState.winner}</strong> won the match.</>)}
                 </p>
                 <button
                   onClick={handlePlayAgain}

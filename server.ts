@@ -58,7 +58,7 @@ async function startServer() {
 
     if (winners.length === 1) {
       room.gameStarted = false;
-      io.to(roomCode).emit("game-over", { winner: winners[0].name, isTie: false });
+      io.to(roomCode).emit("gameWon", { winner: winners[0].name });
       return;
     }
 
