@@ -75,6 +75,7 @@ export default function App() {
   const victoryAudioRef = useRef<HTMLAudioElement | null>(null);
   const victoryAudioTimeoutRef = useRef<number | null>(null);
   const bingoStopTimeoutRef = useRef<number | null>(null);
+  const winTriggeredRef = useRef(false);
   const boardFrameRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   useEffect(() => {
@@ -83,21 +84,32 @@ export default function App() {
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
+
+  const stopVictoryFeedback = useCallback(() => {
+    if (victoryAudioTimeoutRef.current) {
+      window.clearTimeout(victoryAudioTimeoutRef.current);
+      victoryAudioTimeoutRef.current = null;
+    }
+
+    if (bingoStopTimeoutRef.current) {
+      window.clearTimeout(bingoStopTimeoutRef.current);
+      bingoStopTimeoutRef.current = null;
+    }
+
+    if (victoryAudioRef.current) {
+      victoryAudioRef.current.pause();
+      victoryAudioRef.current.currentTime = 0;
+      victoryAudioRef.current = null;
+    }
+
+    window.speechSynthesis?.cancel();
+  }, []);
+
   useEffect(() => {
     return () => {
-      if (victoryAudioTimeoutRef.current) {
-        window.clearTimeout(victoryAudioTimeoutRef.current);
-      }
-      if (victoryAudioRef.current) {
-        victoryAudioRef.current.pause();
-        victoryAudioRef.current.currentTime = 0;
-      }
-      if (bingoStopTimeoutRef.current) {
-        window.clearTimeout(bingoStopTimeoutRef.current);
-      }
-      window.speechSynthesis?.cancel();
+      stopVictoryFeedback();
     };
-  }, []);
+  }, [stopVictoryFeedback]);
 
   const completedPatterns = useMemo(() => getCompletedPatterns(gameState.marked), [gameState.marked]);
   const completedCellKeys = useMemo(() => new Set(completedPatterns.flatMap(getPatternCells)), [completedPatterns]);
@@ -194,6 +206,8 @@ export default function App() {
   }, [completedPatterns, gameState.board]);
 
   const resetBoard = () => {
+    winTriggeredRef.current = false;
+    stopVictoryFeedback();
     setGameState({
       board: generateBoard(),
       marked: Array(5).fill(null).map(() => Array(5).fill(false)),
@@ -205,6 +219,76 @@ export default function App() {
       currentTurn: null,
     });
   };
+
+  const triggerWin = useCallback((showConfettiBlast = true) => {
+    if (winTriggeredRef.current) {
+      return;
+    }
+
+    winTriggeredRef.current = true;
+
+    if (showConfettiBlast) {
+      confetti({
+        particleCount: 220,
+        spread: 100,
+        startVelocity: 42,
+        ticks: 220,
+        origin: { y: 0.58 },
+        colors: ['#33c3c8', '#ff8a66', '#f5c76b', '#ffffff']
+      });
+      confetti({
+        particleCount: 120,
+        angle: 60,
+        spread: 70,
+        startVelocity: 38,
+        origin: { x: 0, y: 0.72 },
+        colors: ['#33c3c8', '#f5c76b', '#ff8a66']
+      });
+      confetti({
+        particleCount: 120,
+        angle: 120,
+        spread: 70,
+        startVelocity: 38,
+        origin: { x: 1, y: 0.72 },
+        colors: ['#33c3c8', '#f5c76b', '#ff8a66']
+      });
+    }
+
+    if (!soundEnabled) {
+      return;
+    }
+
+    stopVictoryFeedback();
+
+    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3');
+    audio.currentTime = 0;
+    audio.loop = true;
+    victoryAudioRef.current = audio;
+    audio.play().catch(() => {});
+
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance('BINGO STOP');
+      utterance.rate = 0.9;
+      utterance.pitch = 0.9;
+      utterance.volume = 1;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    }
+
+    victoryAudioTimeoutRef.current = window.setTimeout(() => {
+      if (victoryAudioRef.current === audio) {
+        audio.pause();
+        audio.currentTime = 0;
+        victoryAudioRef.current = null;
+      }
+      victoryAudioTimeoutRef.current = null;
+    }, 3000);
+
+    bingoStopTimeoutRef.current = window.setTimeout(() => {
+      window.speechSynthesis?.cancel();
+      bingoStopTimeoutRef.current = null;
+    }, 3000);
+  }, [soundEnabled, stopVictoryFeedback]);
 
   const markNumber = useCallback((num: number, isLocal: boolean) => {
     let markSummary: { found: boolean; completedLines: number; isWinner: boolean } | null = null;
@@ -234,7 +318,7 @@ export default function App() {
 
       if (isWinner && !prev.isGameOver) {
         if (gameMode === 'single') {
-          triggerWin();
+          triggerWin(true);
           updateScore('player');
           return {
             ...prev,
@@ -260,7 +344,7 @@ export default function App() {
     });
 
     return markSummary;
-  }, []); // No dependencies, uses refs
+  }, [triggerWin]);
 
   // Initialize Socket
   useEffect(() => {
@@ -319,6 +403,8 @@ export default function App() {
     });
 
     socket.on('game-start', ({ players: updatedPlayers, turn }) => {
+      winTriggeredRef.current = false;
+      stopVictoryFeedback();
       setPlayers(updatedPlayers);
       setGameState(prev => ({ ...prev, currentTurn: turn, isGameOver: false, isDraw: false, winner: null }));
       const other = updatedPlayers.find(p => p.id !== socket.id);
@@ -343,7 +429,7 @@ export default function App() {
 
     socket.on('gameWon', ({ winner }: { winner: string }) => {
       setGameState(prev => ({ ...prev, isGameOver: true, isDraw: false, winner, currentTurn: null }));
-      triggerWin();
+      triggerWin(winner === stateRef.current.playerName);
 
       if (winner === stateRef.current.playerName) {
         updateScore('player');
@@ -367,6 +453,7 @@ export default function App() {
     });
 
     socket.on('game-reset', ({ turn }) => {
+      winTriggeredRef.current = false;
       resetBoard();
       setGameState(prev => ({ ...prev, currentTurn: turn, isGameOver: false, isDraw: false, winner: null }));
     });
@@ -377,6 +464,8 @@ export default function App() {
     });
 
     socket.on('player-left', () => {
+      winTriggeredRef.current = false;
+      stopVictoryFeedback();
       setPlayers(prev => prev.filter(player => player.id === socket.id));
       setGameState(prev => ({
         ...prev,
@@ -392,7 +481,7 @@ export default function App() {
     return () => {
       socket.disconnect();
     };
-  }, [markNumber]); // Only markNumber as dependency
+  }, [markNumber, stopVictoryFeedback, triggerWin]); // Only stable callbacks as dependencies
 
   // Generate User Code on Login
   useEffect(() => {
@@ -492,81 +581,6 @@ export default function App() {
       return () => clearTimeout(timer);
     }
   }, [gameMode, gameState.currentTurn, gameState.isGameOver, markNumber]);
-
-  const triggerWin = () => {
-    confetti({
-      particleCount: 220,
-      spread: 100,
-      startVelocity: 42,
-      ticks: 220,
-      origin: { y: 0.58 },
-      colors: ['#33c3c8', '#ff8a66', '#f5c76b', '#ffffff']
-    });
-    confetti({
-      particleCount: 120,
-      angle: 60,
-      spread: 70,
-      startVelocity: 38,
-      origin: { x: 0, y: 0.72 },
-      colors: ['#33c3c8', '#f5c76b', '#ff8a66']
-    });
-    confetti({
-      particleCount: 120,
-      angle: 120,
-      spread: 70,
-      startVelocity: 38,
-      origin: { x: 1, y: 0.72 },
-      colors: ['#33c3c8', '#f5c76b', '#ff8a66']
-    });
-
-    if (!soundEnabled) {
-      return;
-    }
-
-    if (victoryAudioTimeoutRef.current) {
-      window.clearTimeout(victoryAudioTimeoutRef.current);
-    }
-
-    if (bingoStopTimeoutRef.current) {
-      window.clearTimeout(bingoStopTimeoutRef.current);
-    }
-
-    if (victoryAudioRef.current) {
-      victoryAudioRef.current.pause();
-      victoryAudioRef.current.currentTime = 0;
-    }
-
-    window.speechSynthesis?.cancel();
-
-    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/270/270-preview.mp3');
-    audio.currentTime = 0;
-    audio.loop = true;
-    victoryAudioRef.current = audio;
-    audio.play().catch(() => {});
-
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance('BINGO STOP');
-      utterance.rate = 0.9;
-      utterance.pitch = 0.9;
-      utterance.volume = 1;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
-
-    victoryAudioTimeoutRef.current = window.setTimeout(() => {
-      audio.pause();
-      audio.currentTime = 0;
-      if (victoryAudioRef.current === audio) {
-        victoryAudioRef.current = null;
-      }
-      victoryAudioTimeoutRef.current = null;
-    }, 3000);
-
-    bingoStopTimeoutRef.current = window.setTimeout(() => {
-      window.speechSynthesis?.cancel();
-      bingoStopTimeoutRef.current = null;
-    }, 3000);
-  };
 
   const updateScore = (who: 'player' | 'opponent') => {
     setScores(prev => {
@@ -1275,12 +1289,12 @@ export default function App() {
                 className="panel-card-strong flex w-full max-w-md flex-col items-center rounded-[2rem] px-5 sm:px-8 py-6 sm:py-7"
               >
                 <h3 className="mb-2 text-center text-3xl font-black text-[var(--ink)]">
-                  {gameState.isDraw ? "Match Draw" : (gameState.winner === playerName ? 'Congratulations!' : 'Better luck next time!')}
+                  {gameState.isDraw ? "Match Draw" : (gameState.winner === playerName ? 'You Won' : 'You Lost')}
                 </h3>
                 <p className="mb-5 text-center text-[var(--muted)]">
                   {gameState.isDraw
                     ? 'Both boards hit five lines on the same move. The round ends as a tie.'
-                    : (<><strong className="font-black text-[var(--ink)]">{gameState.winner}</strong> won the match.</>)}
+                    : (<span className="block text-center font-black text-[var(--ink)]"><strong>{gameState.winner}</strong> won the match.</span>)}
                 </p>
                 <button
                   onClick={handlePlayAgain}
