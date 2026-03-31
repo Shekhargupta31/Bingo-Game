@@ -52,13 +52,13 @@ async function startServer() {
 
     if (winners.length === 2) {
       room.gameStarted = false;
-      io.to(roomCode).emit("game-over", { winner: null, isTie: true });
+      io.to(roomCode).emit("gameOver", { winner: null, isTie: true });
       return;
     }
 
     if (winners.length === 1) {
       room.gameStarted = false;
-      io.to(roomCode).emit("gameWon", { winner: winners[0].name });
+      io.to(roomCode).emit("gameOver", { winner: winners[0].name, isTie: false });
       return;
     }
 

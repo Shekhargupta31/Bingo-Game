@@ -220,39 +220,41 @@ export default function App() {
     });
   };
 
-  const triggerWin = useCallback((showConfettiBlast = true) => {
+  const checkWin = useCallback((marked: boolean[][]) => {
+    return checkLines(marked) >= 5;
+  }, []);
+
+  const triggerWinEffects = useCallback(() => {
     if (winTriggeredRef.current) {
       return;
     }
 
     winTriggeredRef.current = true;
 
-    if (showConfettiBlast) {
-      confetti({
-        particleCount: 220,
-        spread: 100,
-        startVelocity: 42,
-        ticks: 220,
-        origin: { y: 0.58 },
-        colors: ['#33c3c8', '#ff8a66', '#f5c76b', '#ffffff']
-      });
-      confetti({
-        particleCount: 120,
-        angle: 60,
-        spread: 70,
-        startVelocity: 38,
-        origin: { x: 0, y: 0.72 },
-        colors: ['#33c3c8', '#f5c76b', '#ff8a66']
-      });
-      confetti({
-        particleCount: 120,
-        angle: 120,
-        spread: 70,
-        startVelocity: 38,
-        origin: { x: 1, y: 0.72 },
-        colors: ['#33c3c8', '#f5c76b', '#ff8a66']
-      });
-    }
+    confetti({
+      particleCount: 220,
+      spread: 100,
+      startVelocity: 42,
+      ticks: 220,
+      origin: { y: 0.58 },
+      colors: ['#33c3c8', '#ff8a66', '#f5c76b', '#ffffff']
+    });
+    confetti({
+      particleCount: 120,
+      angle: 60,
+      spread: 70,
+      startVelocity: 38,
+      origin: { x: 0, y: 0.72 },
+      colors: ['#33c3c8', '#f5c76b', '#ff8a66']
+    });
+    confetti({
+      particleCount: 120,
+      angle: 120,
+      spread: 70,
+      startVelocity: 38,
+      origin: { x: 1, y: 0.72 },
+      colors: ['#33c3c8', '#f5c76b', '#ff8a66']
+    });
 
     if (!soundEnabled) {
       return;
@@ -313,12 +315,14 @@ export default function App() {
 
       const newLines = checkLines(newMarked);
       const newBingoLetters = getBingoProgress(newLines);
-      const isWinner = newLines >= 5;
+      const isWinner = checkWin(newMarked);
       markSummary = { found, completedLines: newLines, isWinner };
 
       if (isWinner && !prev.isGameOver) {
         if (gameMode === 'single') {
-          triggerWin(true);
+          console.log('[Bingo] checkWin passed in single-player, calling triggerWinEffects()');
+          triggerWinEffects();
+          console.log('[Bingo] triggerWinEffects() finished in single-player');
           updateScore('player');
           return {
             ...prev,
@@ -344,7 +348,7 @@ export default function App() {
     });
 
     return markSummary;
-  }, [triggerWin]);
+  }, [checkWin, triggerWinEffects]);
 
   // Initialize Socket
   useEffect(() => {
@@ -427,25 +431,18 @@ export default function App() {
       setGameState(prev => ({ ...prev, currentTurn: nextTurnId }));
     });
 
-    socket.on('gameWon', ({ winner }: { winner: string }) => {
-      setGameState(prev => ({ ...prev, isGameOver: true, isDraw: false, winner, currentTurn: null }));
-      triggerWin(winner === stateRef.current.playerName);
-
-      if (winner === stateRef.current.playerName) {
-        updateScore('player');
-      } else {
-        updateScore('opponent');
-      }
-    });
-
-    socket.on('game-over', ({ winner, isTie }: { winner: string | null; isTie: boolean }) => {
+    socket.on('gameOver', ({ winner, isTie }: { winner: string | null; isTie: boolean }) => {
       setGameState(prev => ({ ...prev, isGameOver: true, isDraw: isTie, winner, currentTurn: null }));
+
       if (isTie) {
         return;
       }
 
+      console.log('[Bingo] gameOver received, calling triggerWinEffects()', { winner });
+      triggerWinEffects();
+      console.log('[Bingo] triggerWinEffects() finished after gameOver', { winner });
+
       if (winner === stateRef.current.playerName) {
-        triggerWin();
         updateScore('player');
       } else {
         updateScore('opponent');
@@ -481,7 +478,7 @@ export default function App() {
     return () => {
       socket.disconnect();
     };
-  }, [markNumber, stopVictoryFeedback, triggerWin]); // Only stable callbacks as dependencies
+  }, [markNumber, stopVictoryFeedback, triggerWinEffects]); // Only stable callbacks as dependencies
 
   // Generate User Code on Login
   useEffect(() => {
