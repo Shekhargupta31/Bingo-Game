@@ -764,11 +764,17 @@ export default function App() {
           <div className="guide-boy-character">
             <div className="guide-boy-head">
               <span className="guide-boy-hair" />
+              <span className="guide-boy-ear guide-boy-ear-left" />
+              <span className="guide-boy-ear guide-boy-ear-right" />
               <span className="guide-boy-eye guide-boy-eye-left" />
               <span className="guide-boy-eye guide-boy-eye-right" />
+              <span className="guide-boy-blush guide-boy-blush-left" />
+              <span className="guide-boy-blush guide-boy-blush-right" />
               <span className="guide-boy-smile" />
             </div>
             <div className="guide-boy-torso">
+              <span className="guide-boy-hood" />
+              <span className="guide-boy-pocket" />
               <span className="guide-boy-arm guide-boy-arm-left" />
               <span className="guide-boy-arm guide-boy-arm-right" />
             </div>

@@ -596,7 +596,7 @@ body {
   z-index: 2;
   height: min(19rem, 28vh);
   pointer-events: none;
-  animation: guideBoyTraverse 8.6s ease-in-out infinite;
+  animation: guideBoyTraverse 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
 }
 
 .guide-boy-shadow {
@@ -606,9 +606,9 @@ body {
   width: 5.6rem;
   height: 1rem;
   border-radius: 999px;
-  background: rgba(15, 11, 36, 0.28);
-  filter: blur(8px);
-  animation: guideShadowShift 8.6s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(15, 11, 36, 0.42), rgba(15, 11, 36, 0));
+  filter: blur(10px);
+  animation: guideShadowShift 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
 }
 
 .guide-boy-character {
@@ -619,8 +619,9 @@ body {
   height: 12rem;
   transform-origin: center bottom;
   animation:
-    guideBodyBob 0.9s ease-in-out infinite,
-    guideLookForm 8.6s ease-in-out infinite;
+    guideBodyBob 2.6s ease-in-out infinite,
+    guideLookForm 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
+  filter: drop-shadow(0 14px 20px rgba(37, 18, 66, 0.18));
 }
 
 .guide-boy-head {
@@ -630,8 +631,11 @@ body {
   width: 3.8rem;
   height: 3.95rem;
   border-radius: 48% 48% 46% 46%;
-  background: linear-gradient(180deg, #ffdcb3, #f3ba8a);
-  box-shadow: inset 0 -0.12rem 0 rgba(201, 123, 83, 0.2);
+  background: linear-gradient(180deg, #ffe3be, #f1b482 78%);
+  box-shadow:
+    inset 0 -0.12rem 0 rgba(201, 123, 83, 0.2),
+    inset 0 0.16rem 0 rgba(255, 245, 232, 0.44);
+  animation: guideHeadTilt 4.6s ease-in-out infinite;
 }
 
 .guide-boy-hair {
@@ -641,11 +645,30 @@ body {
   width: 3.2rem;
   height: 1.6rem;
   border-radius: 65% 40% 45% 35%;
-  background: linear-gradient(180deg, #3c2545, #241530);
+  background: linear-gradient(180deg, #6f4226, #3c2418 72%);
+  box-shadow: inset 0 0.1rem 0 rgba(255, 218, 184, 0.08);
+}
+
+.guide-boy-ear {
+  position: absolute;
+  top: 1.55rem;
+  width: 0.42rem;
+  height: 0.62rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd9b1, #efae80);
+}
+
+.guide-boy-ear-left {
+  left: -0.12rem;
+}
+
+.guide-boy-ear-right {
+  right: -0.12rem;
 }
 
 .guide-boy-eye,
-.guide-boy-smile {
+.guide-boy-smile,
+.guide-boy-blush {
   position: absolute;
 }
 
@@ -659,6 +682,18 @@ body {
 
 .guide-boy-eye-left { left: 1.15rem; }
 .guide-boy-eye-right { right: 1.15rem; }
+
+.guide-boy-blush {
+  top: 2rem;
+  width: 0.52rem;
+  height: 0.24rem;
+  border-radius: 999px;
+  background: rgba(233, 128, 132, 0.28);
+  filter: blur(1px);
+}
+
+.guide-boy-blush-left { left: 0.68rem; }
+.guide-boy-blush-right { right: 0.68rem; }
 
 .guide-boy-smile {
   left: 1.3rem;
@@ -676,10 +711,33 @@ body {
   width: 4.15rem;
   height: 4rem;
   border-radius: 1.3rem 1.3rem 1rem 1rem;
-  background: linear-gradient(180deg, #ffd76d, #ff9e5f);
+  background: linear-gradient(180deg, #ffb461, #f17b2b 78%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -0.18rem 0 rgba(173, 75, 22, 0.22),
     0 8px 22px rgba(58, 30, 72, 0.14);
+}
+
+.guide-boy-hood {
+  position: absolute;
+  top: -0.4rem;
+  left: 0.78rem;
+  width: 2.6rem;
+  height: 1.7rem;
+  border-radius: 1.1rem 1.1rem 0.8rem 0.8rem;
+  background: linear-gradient(180deg, rgba(204, 90, 30, 0.9), rgba(164, 62, 16, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16);
+}
+
+.guide-boy-pocket {
+  position: absolute;
+  left: 1.06rem;
+  bottom: 0.5rem;
+  width: 2rem;
+  height: 1rem;
+  border-radius: 0.75rem 0.75rem 0.55rem 0.55rem;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(174, 73, 21, 0.24);
 }
 
 .guide-boy-arm,
@@ -699,14 +757,14 @@ body {
 
 .guide-boy-arm-left {
   left: -0.42rem;
-  animation: guideLeftArmWalk 0.9s ease-in-out infinite;
+  animation: guideLeftArmWalk 1.1s ease-in-out infinite;
 }
 
 .guide-boy-arm-right {
   right: -0.45rem;
   animation:
-    guideRightArmWave 8.6s ease-in-out infinite,
-    guideRightArmWalk 0.9s ease-in-out infinite;
+    guideRightArmWave 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite,
+    guideRightArmWalk 1.1s ease-in-out infinite;
 }
 
 .guide-boy-legs {
@@ -727,12 +785,12 @@ body {
 
 .guide-boy-leg-left {
   left: 0.25rem;
-  animation: guideLegLeftWalk 0.9s ease-in-out infinite;
+  animation: guideLegLeftWalk 1.1s ease-in-out infinite;
 }
 
 .guide-boy-leg-right {
   right: 0.25rem;
-  animation: guideLegRightWalk 0.9s ease-in-out infinite;
+  animation: guideLegRightWalk 1.1s ease-in-out infinite;
 }
 
 .guide-sparkle {
@@ -742,7 +800,7 @@ body {
   border-radius: 999px;
   background: radial-gradient(circle, rgba(255,255,255,0.92), rgba(255,255,255,0));
   opacity: 0;
-  animation: guideSparkleBurst 8.6s ease-in-out infinite;
+  animation: guideSparkleBurst 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
 }
 
 .sparkle-one { right: 22%; bottom: 7.8rem; }
@@ -859,37 +917,46 @@ body {
 
 @keyframes guideBoyTraverse {
   0%, 100% { transform: translateX(4vw); }
-  22% { transform: translateX(10vw); }
-  50% { transform: translateX(28vw); }
-  62% { transform: translateX(40vw); }
-  72% { transform: translateX(48vw); }
-  82% { transform: translateX(34vw); }
+  10% { transform: translateX(4vw); }
+  22% { transform: translateX(9vw); }
+  38% { transform: translateX(14vw); }
+  54% { transform: translateX(28vw); }
+  66% { transform: translateX(40vw); }
+  74% { transform: translateX(47vw); }
+  84% { transform: translateX(34vw); }
 }
 
 @keyframes guideShadowShift {
-  0%, 100% { transform: scaleX(1); opacity: 0.22; }
-  50% { transform: scaleX(1.08); opacity: 0.3; }
+  0%, 100% { transform: scaleX(1); opacity: 0.24; }
+  50% { transform: scaleX(1.12); opacity: 0.34; }
 }
 
 @keyframes guideBodyBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-0.22rem); }
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50% { transform: translateY(-0.18rem) scaleY(1.01); }
 }
 
 @keyframes guideLookForm {
-  0%, 22% { transform: rotate(0deg); }
-  24%, 68% { transform: rotate(3deg); }
-  72%, 100% { transform: rotate(0deg); }
+  0%, 18% { transform: rotate(0deg); }
+  22%, 64% { transform: rotate(2.4deg); }
+  70%, 100% { transform: rotate(0deg); }
+}
+
+@keyframes guideHeadTilt {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(4deg); }
 }
 
 @keyframes guideRightArmWave {
-  0%, 8% { transform: rotate(-12deg); }
-  11% { transform: rotate(-62deg); }
-  14% { transform: rotate(-18deg); }
-  17% { transform: rotate(-64deg); }
-  20%, 100% { transform: rotate(20deg); }
-  72%, 78% { transform: rotate(-56deg); }
-  82%, 100% { transform: rotate(16deg); }
+  0%, 8% { transform: rotate(-10deg); }
+  12% { transform: rotate(-58deg); }
+  16% { transform: rotate(-16deg); }
+  20% { transform: rotate(-62deg); }
+  24%, 63% { transform: rotate(18deg); }
+  68% { transform: rotate(-38deg); }
+  73% { transform: rotate(-55deg); }
+  78% { transform: rotate(-8deg); }
+  100% { transform: rotate(18deg); }
 }
 
 @keyframes guideLeftArmWalk {
@@ -1225,7 +1292,7 @@ body {
   .login-guide-boy {
     bottom: 4.5rem;
     height: 10rem;
-    animation: guideBoyTraverseMobile 8.6s ease-in-out infinite;
+    animation: guideBoyTraverseMobile 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
   }
 
   .guide-boy-character {
@@ -1310,7 +1377,7 @@ body {
 
   .login-guide-boy {
     bottom: 1.4rem;
-    animation: guideBoyTraverseTablet 8.6s ease-in-out infinite;
+    animation: guideBoyTraverseTablet 9.4s cubic-bezier(0.45, 0.04, 0.2, 0.98) infinite;
   }
 }
 
